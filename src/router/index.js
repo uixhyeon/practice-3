@@ -23,6 +23,13 @@ const router = createRouter({
         }
       },
     },
+    // 기사 로그인 페이지
+    {
+      path: "/worker/login",
+      name: "workerLogin",
+      component: () => import("../pages/worker/LoginWorker.vue"),
+      meta: { requiresAuth: false },
+    },
     // 관리자 페이지  (사이드바 레이아웃 적용)
     {
       path: "/admin",
