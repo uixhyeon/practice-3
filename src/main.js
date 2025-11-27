@@ -1,5 +1,6 @@
-<<<<<<< HEAD
 import './assets/main.css'
+import '@flaticon/flaticon-uicons/css/bold/rounded.css'
+import '@flaticon/flaticon-uicons/css/regular/rounded.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
@@ -13,16 +14,3 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.mount('#app')
-=======
-import './assets/main.css'
-import '@flaticon/flaticon-uicons/css/bold/rounded.css'
-import '@flaticon/flaticon-uicons/css/regular/rounded.css'
-
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-
-import App from './App.vue'
-import router from './router'
-
-createApp(App).use(router).use(createPinia()).mount('#app')
->>>>>>> a080d41cc329b14adb800ca3e46fd8c151a500d6

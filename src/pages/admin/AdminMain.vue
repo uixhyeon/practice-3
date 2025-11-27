@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <template>
   <div class="p-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
     <!-- <h1 class="text-3xl font-bold mb-8" style="color: #1e293b">Main Home</h1> -->
@@ -379,13 +378,6 @@ onMounted(() => {
   loadData()
 })
 </script>
-=======
-<template>
-  <div class="p-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
-    <h1 class="text-3xl font-bold mb-8" style="color: #1E293B">Main Home</h1>
-
-    <!-- 통계 카드 -->
-    <section class="mb-12">
       <h2 class="text-lg font-semibold mb-6" style="color: #1E293B">당일 보관함 현황</h2>
       <div v-if="statsLoading" class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm">통계 로딩 중...</div>
       <div v-else-if="statsError" class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm text-red-500">{{ statsError }}</div>
