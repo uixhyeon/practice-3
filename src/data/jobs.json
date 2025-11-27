@@ -1,0 +1,57 @@
+[
+  {
+    "id": "J001",
+    "date": "2025-11-23",
+    "type": "luggage",
+    "customerName": "김철수",
+    "time": "09:00",
+    "address": "서울시 강남구 테헤란로 123",
+    "phone": "010-1234-5678",
+    "status": "scheduled",
+    "memo": ""
+  },
+  {
+    "id": "J002",
+    "date": "2025-11-23",
+    "type": "ice",
+    "customerName": "이영희",
+    "time": "10:30",
+    "address": "서울시 서초구 반포대로 456",
+    "phone": "010-2345-6789",
+    "status": "scheduled",
+    "memo": "2층 사무실"
+  },
+  {
+    "id": "J003",
+    "date": "2025-11-24",
+    "type": "luggage",
+    "customerName": "박민수",
+    "time": "14:00",
+    "address": "서울시 송파구 올림픽로 789",
+    "phone": "010-3456-7890",
+    "status": "scheduled",
+    "memo": ""
+  },
+  {
+    "id": "J004",
+    "date": "2025-11-24",
+    "type": "ice",
+    "customerName": "최지은",
+    "time": "16:00",
+    "address": "서울시 마포구 홍대입구로 321",
+    "phone": "010-4567-8901",
+    "status": "scheduled",
+    "memo": "주차 가능"
+  },
+  {
+    "id": "J005",
+    "date": "2025-11-25",
+    "type": "luggage",
+    "customerName": "정수진",
+    "time": "11:00",
+    "address": "서울시 중구 명동길 654",
+    "phone": "010-5678-9012",
+    "status": "scheduled",
+    "memo": ""
+  }
+]
