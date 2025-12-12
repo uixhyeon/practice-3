@@ -1,20 +1,3 @@
-<!--
-  ╔══════════════════════════════════════════════════════════════════════╗
-  ║ 페이지: LoginWorker.vue                                              ║
-  ╠══════════════════════════════════════════════════════════════════════╣
-  ║ 타입: 페이지 (Page)                                                  ║
-  ║                                                                      ║
-  ║ 주요 기능:                                                           ║
-  ║ - 워커(기사) 로그인 페이지                                           ║
-  ║ - 기사 ID와 비밀번호 입력                                            ║
-  ║ - 로그인 처리 및 대시보드 이동                                       ║
-  ║                                                                      ║
-  ║ 특징:                                                                ║
-  ║ - 간단한 로그인 폼                                                   ║
-  ║ - 자동 로그인 옵션                                                   ║
-  ║ - 비밀번호 찾기 링크                                                 ║
-  ╚══════════════════════════════════════════════════════════════════════╝
--->
 
 <template>
   <div class="w-full min-h-screen flex items-center justify-center px-4">
@@ -86,7 +69,7 @@ const password = ref("");
 const login = () => {
   if (workerId.value && password.value) {
     alert("로그인 성공~ 작업목록으로 이동합니다.");
-    router.push("/worker/workerMain");
+    router.push("/worker/dashboard");
   } else {
     alert("기사ID와 비밀번호를 입력해주세요.");
   }

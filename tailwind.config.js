@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+
 export default {
   content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   darkMode: 'class',
@@ -7,34 +8,41 @@ export default {
       'sm': '640px',
       'md': '768px',
       'lg': '1024px',
-      'xl': '1280px',
+      'xl': '1235px',
       'xxl': '1440px',
       '2xl': '1536px',
     },
     extend: {
-      // Colors
+      // Colors (from SCSS variables)
       colors: {
-        // Primary Colors
-        primary: '#296AF1',
-        accent: '#3DD9B6',
+        // Primary Colors (Brand)
+        primary: 'var(--primary, #3482FF)',
+        'primary-light': 'var(--primary-light, #6FAEFF)',
+        // Accent Color (Point)
+        accent: 'var(--accent, #296AF1)',
         // Status Colors
-        warning: '#FFC83D',
-        error: '#EF4444',
+        warning: 'var(--warning, #FFC83D)',
+        error: 'var(--error, #EF4444)',
         // Grayscale
-        'gray-900': '#1E293B',
-        'gray-600': '#64748B',
-        'gray-200': '#E2E8F0',
+        'gray-900': 'var(--gray-900, #1E293B)',
+        'gray-600': 'var(--gray-600, #64748B)',
+        'gray-200': 'var(--gray-200, #E2E8F0)',
         // Background
-        background: '#F8FAFC',
+        background: 'var(--background, #F8FAFC)',
         // Dark Mode
-        'dark-bg': '#0F172A',
-        'dark-bg-secondary': '#1E293B',
-        'dark-bg-tertiary': '#334155',
-        'dark-text-primary': '#F1F5F9',
-        'dark-text-secondary': '#CBD5E1',
-        'dark-text-tertiary': '#94A3B8',
-        'dark-border': '#334155',
-        'dark-border-light': '#475569'
+        'dark-bg': 'var(--dark-bg, #0F172A)',
+        'dark-bg-secondary': 'var(--dark-bg-secondary, #1E293B)',
+        'dark-bg-tertiary': 'var(--dark-bg-tertiary, #334155)',
+        'dark-text-primary': 'var(--dark-text-primary, #F1F5F9)',
+        'dark-text-secondary': 'var(--dark-text-secondary, #CBD5E1)',
+        'dark-text-tertiary': 'var(--dark-text-tertiary, #94A3B8)',
+        'dark-border': 'var(--dark-border, #334155)',
+        'dark-border-light': 'var(--dark-border-light, #475569)',
+        // Table Header Colors
+        'table-header-bg': 'var(--table-header-bg, #1E293B)',
+        'table-header-text': 'var(--table-header-text, #C4CFE1)',
+        'table-header-bg-dark': 'var(--table-header-bg-dark, #C4CFE1)',
+        'table-header-text-dark': 'var(--table-header-text-dark, #334155)'
       },
       // Font Families
       fontFamily: {
@@ -93,7 +101,7 @@ export default {
       },
       // Shadows
       boxShadow: {
-        sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        sm: '0 4px 12px rgba(0, 0, 0, 0.08)',
         base: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
         md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
         lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',

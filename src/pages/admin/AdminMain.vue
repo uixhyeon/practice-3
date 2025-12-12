@@ -1,202 +1,584 @@
 <template>
-  <div class="p-8 bg-slate-50 dark:bg-slate-900 min-h-screen">
+  <div class="px-6 bg-slate-50 dark:bg-slate-900 h-[calc(100vh-130px)] scrollbar-hide">
     <!-- <h1 class="text-3xl font-bold mb-8" style="color: #1e293b">Main Home</h1> -->
 
-    <!-- 통계 카드 -->
-    <section class="mb-12">
-      <h2 class="text-lg font-semibold mb-6" style="color: #1e293b">당일 보관함 현황</h2>
-      <div v-if="loading" class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm">
-        통계 로딩 중...
-      </div>
-      <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <StatCard
-          label="미사용"
-          :value="stats.available"
-          icon="fi-rr-box"
-          variant="gradient-blue"
-        />
-        <StatCard label="사용중" :value="stats.inUse" icon="fi-rr-lock" variant="gradient-black" />
-        <StatCard
-          label="사용률"
-          :value="`${stats.usageRate}%`"
-          icon="fi-rr-chart-pie"
-          variant="gradient-blue"
-        />
-        <StatCard
-          label="활성 예약"
-          :value="stats.activeReservations"
-          icon="fi-rr-calendar-check"
-          variant="gradient-black"
-        />
-        <div class="hidden lg:block">
-          <StatCard
-            label="총 고객"
-            :value="stats.totalCustomers"
-            icon="fi-rr-users"
-            variant="gradient-blue"
-          />
-        </div>
-      </div>
-    </section>
+    <!-- 전체 공지 사항 ===============================================================-->
+    <div class="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <section class="flex flex-col">
+        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-table-header-text">
+          전체 공지 사항
+          <i class="fi fi-rr-info text-lg align-middle flex-shrink-0"></i>
+        </h2>
 
-    <!-- 두 컬럼 레이아웃 -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-      <!-- 좌측: 최근 예약 + 차트 -->
-      <div>
-        <!-- 최근 예약 테이블 -->
-        <section class="mb-8">
-          <h2 class="text-lg font-semibold mb-4" style="color: #1e293b">최근 예약</h2>
-          <div
-            v-if="loading"
-            class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm text-slate-600 dark:text-slate-400"
-          >
-            예약 로딩 중...
-          </div>
-          <table
-            v-else
-            class="w-full bg-white dark:bg-slate-800 rounded-2xl shadow-sm overflow-hidden text-sm"
-          >
-            <thead class="bg-slate-100 dark:bg-slate-700">
-              <tr>
-                <th class="px-4 py-3 text-left font-semibold" style="color: #1e293b">접수시간</th>
-                <th class="px-4 py-3 text-left font-semibold" style="color: #1e293b">이름</th>
-                <th class="px-4 py-3 text-left font-semibold" style="color: #1e293b">보관함</th>
-                <th class="px-4 py-3 text-left font-semibold" style="color: #1e293b">상태</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="reservation in recentReservations.slice(0, 5)"
-                :key="reservation.id"
-                class="border-t border-slate-200 dark:border-slate-700"
-              >
-                <td class="px-4 py-3 text-slate-900 dark:text-slate-100">
-                  {{ formatDateTime(reservation.createdAt) }}
-                </td>
-                <td class="px-4 py-3 text-slate-900 dark:text-slate-100">
-                  {{ reservation.customerName }}
-                </td>
-                <td class="px-4 py-3 text-slate-900 dark:text-slate-100">
-                  {{ reservation.lockerNumber }}
-                </td>
-                <td class="px-4 py-3">
-                  <StatusChip :status="getReservationStatus(reservation.status)" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
-
-        <!-- 차트 영역 -->
-        <section class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6">
-          <h2 class="text-lg font-semibold mb-4" style="color: #1e293b">보관함 상태 분포</h2>
-          <div class="h-64">
-            <Bar :data="chartData" :options="chartOptions" />
-          </div>
-        </section>
-      </div>
-
-      <!-- 우측: 회원 등급별 현황 + 사용 고객 목록 -->
-      <div>
-        <!-- 회원 등급별 현황 -->
-        <section class="mb-8">
-          <h2 class="text-lg font-semibold mb-4" style="color: #1e293b">회원 등급별 현황</h2>
-          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6">
-            <div class="h-64">
-              <Doughnut :data="membershipChartData" :options="doughnutChartOptions" />
-            </div>
-          </div>
-        </section>
-
-        <!-- 사용 고객 목록 -->
-        <section>
-          <h2 class="text-lg font-semibold mb-4" style="color: #1e293b">현재 사용 고객</h2>
-          <div
-            v-if="loading"
-            class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm text-slate-600 dark:text-slate-400"
-          >
-            고객 정보 로딩 중...
-          </div>
-          <div v-else class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm overflow-hidden">
-            <table class="w-full text-sm">
-              <thead class="bg-slate-100 dark:bg-slate-700">
+        <div
+          class="flex-1 max-w-full overflow-hidden rounded-2xl"
+          style="box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08)"
+        >
+          <div class="h-full overflow-y-auto scrollbar-hide bg-white dark:bg-slate-800 rounded-2xl">
+            <table class="w-full text-[10px] sm:text-xs min-w-max">
+              <thead class="sticky top-0 bg-table-header-bg dark:bg-table-header-bg-dark z-10">
                 <tr>
-                  <th class="px-4 py-3 text-left font-semibold" style="color: #1e293b">고객명</th>
-                  <th class="px-4 py-3 text-left font-semibold" style="color: #1e293b">보관함</th>
-                  <th class="px-4 py-3 text-left font-semibold" style="color: #1e293b">등급</th>
-                  <th class="px-4 py-3 text-left font-semibold" style="color: #1e293b">전화번호</th>
+                  <th
+                    class="ml-2 text-left px-1 sm:px-2 py-1 sm:py-2 font-semibold text-[9px] sm:text-xs text-table-header-text dark:text-table-header-text-dark whitespace-nowrap"
+                  >
+                    No.
+                  </th>
+                  <th
+                    class="px-1 sm:px-2 py-1 sm:py-2 text-left font-semibold text-[9px] sm:text-xs text-table-header-text dark:text-table-header-text-dark whitespace-nowrap"
+                  >
+                    제목
+                  </th>
+                  <th
+                    class="px-1 sm:px-2 py-1 sm:py-2 text-center font-semibold text-[9px] sm:text-xs text-table-header-text dark:text-table-header-text-dark whitespace-nowrap"
+                  >
+                    등록일
+                  </th>
+                  <th
+                    class="text-right px-1 sm:px-2 py-1 sm:py-2 font-semibold text-[9px] sm:text-xs text-table-header-text dark:text-table-header-text-dark whitespace-nowrap"
+                  >
+                    <i
+                      class="fi fi-br-plus text-md align-middle mr-2 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      @click="openAddNoticeModal"
+                    ></i>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr
-                  v-for="customer in activeCustomers.slice(0, 6)"
-                  :key="customer.id"
-                  class="border-t border-slate-200 dark:border-slate-700"
+                  v-for="(notice, index) in notices"
+                  :key="notice.id"
+                  class="border-t border-slate-200 dark:border-slate-700 h-8 sm:h-10 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+                  @click="openNoticeDetail(notice)"
                 >
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">
-                    {{ customer.name }}
+                  <td
+                    class="text-left px-1 sm:px-2 py-0.5 sm:py-1 text-[9px] sm:text-xs text-slate-900 dark:text-slate-100 whitespace-nowrap"
+                  >
+                    {{ index + 1 }}
                   </td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">
-                    {{ customer.lockerNumber }}
-                  </td>
-                  <td class="px-4 py-3">
+                  <td
+                    class="px-1 sm:px-2 py-0.5 sm:py-1 text-left text-[9px] sm:text-xs text-slate-900 dark:text-slate-100 whitespace-nowrap"
+                  >
+                    <span>{{ notice.title }}</span>
                     <span
-                      class="px-2 py-1 rounded-full text-xs font-medium"
-                      :class="getMembershipClass(customer.membershipLevel)"
+                      v-if="isNewNotice(notice.createdAt) && !notice.isRead"
+                      class="ml-2 text-[8px] sm:text-[10px] font-bold text-red-500"
                     >
-                      {{ getMembershipLabel(customer.membershipLevel) }}
+                      New
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">
-                    {{ customer.phone }}
+                  <td
+                    class="px-1 sm:px-2 py-0.5 sm:py-1 text-center text-[9px] sm:text-xs text-slate-900 dark:text-slate-100 whitespace-nowrap"
+                  >
+                    {{ formatDateTime(notice.createdAt) }}
                   </td>
+                  <td class="px-1 sm:px-2 py-0.5 sm:py-1 text-right"></td>
                 </tr>
               </tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+      <!--  END OF 전체 공지 사항 ===============================================================-->
+
+      <section>
+        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-table-header-text">
+          당일 보관함 현황
+        </h2>
+
+        <div
+          v-if="loading"
+          class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm"
+          style="box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08)"
+        >
+          통계 로딩 중...
+        </div>
+        <div v-else class="grid grid-cols-2 gap-3 mb-5">
+          <!-- 사용중 ==========================-->
+
+          <ComCard
+            label="사용중"
+            :value="stats.inUse + '건'"
+            icon="fi-rs-calendar-check"
+            variant="blue"
+            layout="horizontal"
+          />
+          <!-- 사용률 ============================-->
+
+          <ComCard
+            label="사용률"
+            :value="stats.usageRate + ' %'"
+            icon="fi-rr-chart-pie"
+            variant="green"
+            layout="horizontal"
+          />
+        </div>
+
+        <!--  ==================================================================== -->
+
+        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-table-header-text">
+          고객 분석
+        </h2>
+        <div
+          v-if="loading"
+          class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm"
+          style="box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08)"
+        >
+          통계 로딩 중...
+        </div>
+        <div v-else class="grid grid-cols-2 gap-3 mb-5">
+          <!-- 현재 이용자 수 -->
+
+          <ComCard
+            label="이용자 수"
+            :value="stats.inUse"
+            icon="fi-rr-chart-pie"
+            variant="puple"
+            layout="horizontal"
+          />
+
+          <ComCard
+            label="이용률"
+            :value="stats.usageRate + ' %'"
+            icon="fi-rr-users"
+            variant="black"
+            layout="horizontal"
+          />
+        </div>
+      </section>
+    </div>
+    <!-- =============================================================================================================== -->
+
+    <!--   최근 예약 테이블 + 차트 (2칼럼) -->
+    <div class="lg:col-span-2">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- 최근 예약 테이블  ===========================================-->
+        <section class="flex flex-col">
+          <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-table-header-text">
+            최근 예약
+          </h2>
+          <div
+            v-if="loading"
+            class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm text-slate-600 dark:text-slate-400"
+            style="box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08)"
+          >
+            예약 로딩 중...
+          </div>
+          <div
+            v-if="!loading"
+            class="flex-1 max-w-full overflow-hidden rounded-2xl"
+            style="box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08)"
+          >
+            <div
+              class="h-full overflow-y-auto scrollbar-hide bg-white dark:bg-slate-800 rounded-2xl"
+            >
+              <table class="w-full text-[10px] sm:text-xs min-w-max">
+                <thead class="sticky top-0 bg-table-header-bg dark:bg-table-header-bg-dark z-10">
+                  <tr>
+                    <th
+                      class="px-1 sm:px-2 py-1 sm:py-2 text-left font-semibold text-[9px] sm:text-xs text-table-header-text dark:text-table-header-text-dark whitespace-nowrap"
+                    >
+                      예약 ID
+                    </th>
+                    <th
+                      class="px-1 sm:px-2 py-1 sm:py-2 text-center font-semibold text-[9px] sm:text-xs text-table-header-text dark:text-table-header-text-dark whitespace-nowrap"
+                    >
+                      이벤트 ID
+                    </th>
+                    <th
+                      class="px-1 sm:px-2 py-1 sm:py-2 text-center font-semibold text-[9px] sm:text-xs text-table-header-text dark:text-table-header-text-dark whitespace-nowrap"
+                    >
+                      보관함 ID
+                    </th>
+
+                    <!-- <th
+                      class="px-1 sm:px-2 py-1 sm:py-2 text-center font-semibold text-[9px] sm:text-xs text-table-header-text dark:text-table-header-text-dark whitespace-nowrap"
+                    >
+                      보관 시작시간
+                    </th> -->
+                    <th
+                      class="px-1 sm:px-2 py-1 sm:py-2 text-center font-semibold text-[9px] sm:text-xs text-table-header-text dark:text-table-header-text-dark whitespace-nowrap"
+                    >
+                      고객명
+                    </th>
+                    <!-- <th
+                  class="px-2 py-2 text-center font-semibold text-table-header-text dark:text-table-header-text-dark whitespace-nowrap"
+                >
+                  접근코드
+                </th> -->
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="reservation in recentReservations"
+                    :key="reservation.id"
+                    class="border-t border-slate-200 dark:border-slate-700 h-8 sm:h-10 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+                  >
+                    <td
+                      class="px-1 sm:px-2 py-0.5 sm:py-1 text-left text-[9px] sm:text-xs text-slate-900 dark:text-slate-100 whitespace-nowrap"
+                    >
+                      {{ reservation.id }}
+                    </td>
+                    <td
+                      class="px-1 sm:px-2 py-0.5 sm:py-1 text-center text-[9px] sm:text-xs text-slate-900 dark:text-slate-100 whitespace-nowrap"
+                    >
+                      {{ reservation.eventId }}
+                    </td>
+                    <td
+                      class="px-1 sm:px-2 py-0.5 sm:py-1 text-center text-[9px] sm:text-xs text-slate-900 dark:text-slate-100 whitespace-nowrap"
+                    >
+                      {{ reservation.lockerId }}
+                    </td>
+
+                    <!-- <td
+                      class="px-1 sm:px-2 py-0.5 sm:py-1 text-center text-[9px] sm:text-xs text-slate-900 dark:text-slate-100 whitespace-nowrap"
+                    >
+                      {{ formatDateTime(reservation.createdAt) }}
+                    </td> -->
+                    <td
+                      class="px-1 sm:px-2 py-0.5 sm:py-1 text-center text-[9px] sm:text-xs text-slate-900 dark:text-slate-100 whitespace-nowrap"
+                    >
+                      {{ reservation.customerName }}
+                    </td>
+                    <!-- <td
+                  class="px-2 py-1 text-center text-slate-900 dark:text-slate-100 whitespace-nowrap"
+                >
+                  {{ reservation.accessCode }}
+                </td> -->
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </section>
+
+        <!-- 차트 영역 -->
+        <section>
+          <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-table-header-text">
+            보관함 상태 분포
+          </h2>
+
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6"
+            style="box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08)"
+          >
+            <div class="h-64">
+              <Bar :data="chartData" :options="chartOptions" />
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- 공지사항 추가 모달 -->
+    <div
+      v-if="showAddNoticeModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click.self="closeAddNoticeModal"
+    >
+      <div
+        class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-6 text-gray-900 dark:text-white">공지사항 추가</h3>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                제목
+              </label>
+              <input
+                v-model="newNotice.title"
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+                placeholder="공지사항 제목을 입력하세요"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                내용
+              </label>
+              <textarea
+                v-model="newNotice.content"
+                rows="8"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white resize-none"
+                placeholder="공지사항 내용을 입력하세요"
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                등록자
+              </label>
+              <input
+                v-model="newNotice.author"
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div class="flex gap-3 mt-6">
+            <button
+              @click="addNotice"
+              class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              등록
+            </button>
+            <button
+              @click="closeAddNoticeModal"
+              class="flex-1 px-6 py-3 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors font-medium"
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 공지사항 상세보기 모달 -->
+    <div
+      v-if="showNoticeModal && selectedNotice"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click.self="closeNoticeModal"
+    >
+      <div
+        class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div class="p-6">
+          <div class="flex items-start justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white pr-4">
+              {{ selectedNotice.title }}
+            </h3>
+            <button
+              @click="closeNoticeModal"
+              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"
+            >
+              <i class="fi fi-rr-cross text-xl"></i>
+            </button>
+          </div>
+
+          <div class="space-y-4 mb-6">
+            <div class="flex gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <div>
+                <span class="font-medium">등록자:</span>
+                <span class="ml-2">{{ selectedNotice.author }}</span>
+              </div>
+              <div>
+                <span class="font-medium">등록일:</span>
+                <span class="ml-2">{{ selectedNotice.createdAt }}</span>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-200 dark:border-slate-700 pt-4">
+              <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                {{ selectedNotice.content }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button
+              v-if="isOwnNotice(selectedNotice)"
+              @click="openEditNoticeModal(selectedNotice)"
+              class="px-6 py-3 bg-transparent border-2 border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-medium"
+            >
+              수정
+            </button>
+            <button
+              v-if="isOwnNotice(selectedNotice)"
+              @click="deleteNotice(selectedNotice.id)"
+              class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+            >
+              삭제
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 공지사항 수정 모달 -->
+    <div
+      v-if="showEditNoticeModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click.self="closeEditNoticeModal"
+    >
+      <div
+        class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-6 text-gray-900 dark:text-white">공지사항 수정</h3>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                제목
+              </label>
+              <input
+                v-model="editNotice.title"
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+                placeholder="공지사항 제목을 입력하세요"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                내용
+              </label>
+              <textarea
+                v-model="editNotice.content"
+                rows="8"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white resize-none"
+                placeholder="공지사항 내용을 입력하세요"
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                등록자
+              </label>
+              <input
+                v-model="editNotice.author"
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div class="flex gap-3 mt-6">
+            <button
+              @click="updateNotice"
+              class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              저장
+            </button>
+            <button
+              @click="closeEditNoticeModal"
+              class="flex-1 px-6 py-3 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors font-medium"
+            >
+              취소
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { Bar, Doughnut } from 'vue-chartjs'
+import { onMounted, computed, ref } from 'vue'
+import { Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
-  ArcElement,
   Title,
   Tooltip,
   Legend,
 } from 'chart.js'
-import StatusChip from '@/components/common/StatusChip.vue'
-import StatCard from '@/components/common/StatCard.vue'
-import lockersData from '@/data/lockers.json'
-import reservationsData from '@/data/reservations.json'
-import customersData from '@/data/customers.json'
+import { useDataStore } from '@/stores/dataStore'
+import ComStatusChip from '@/components/common/ComStatusChip.vue'
+import ComCard from '@/components/common/ComCard.vue'
+
+// 공지사항 데이터
+const notices = ref([
+  {
+    id: 1,
+    title: '시스템 점검 안내',
+    content:
+      '2024년 12월 10일 새벽 2시부터 4시까지 시스템 점검이 예정되어 있습니다. 해당 시간 동안 서비스 이용이 제한될 수 있습니다.',
+    author: '관리자',
+    createdAt: '2024-12-04 14:30:00',
+    isRead: false,
+  },
+  {
+    id: 2,
+    title: '새로운 기능 업데이트',
+    content:
+      'GigStash에 새로운 예약 알림 기능이 추가되었습니다. 예약 시간 30분 전에 자동으로 알림을 받아보실 수 있습니다.',
+    author: '운영팀',
+    createdAt: '2024-12-03 10:15:00',
+    isRead: false,
+  },
+  {
+    id: 3,
+    title: '연말 이벤트 안내',
+    content:
+      '12월 한 달간 모든 회원님들께 특별 할인 혜택을 제공합니다. 자세한 내용은 이벤트 페이지를 확인해주세요.',
+    author: '마케팅팀',
+    createdAt: '2024-12-01 09:00:00',
+    isRead: true,
+  },
+])
+
+// 모달 상태
+const showNoticeModal = ref(false)
+const selectedNotice = ref(null)
+const showAddNoticeModal = ref(false)
+const showEditNoticeModal = ref(false)
+
+// 새 공지사항 폼
+const newNotice = ref({
+  title: '',
+  content: '',
+  author: '관리자',
+})
+
+// 수정할 공지사항
+const editNotice = ref({
+  id: null,
+  title: '',
+  content: '',
+  author: '',
+})
+
+// 현재 로그인한 사용자 (실제로는 인증 시스템에서 가져와야 함)
+const currentUser = ref('관리자')
 
 // Chart.js 등록
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend)
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
-// 로딩 상태
-const loading = ref(true)
+// 중앙 데이터 스토어 사용
+const dataStore = useDataStore()
 
-// 데이터
-const lockers = ref([])
-const reservations = ref([])
-const customers = ref([])
+// 메모이제이션: 스토어의 상태를 직접 사용
+const reservations = computed(() => dataStore.reservations)
+const customers = computed(() => dataStore.customers)
+const loading = computed(() => dataStore.isLoading)
+
+// Firebase Firestore에서 로드된 사물함 데이터 사용
+const lockers = computed(() => {
+  const data = dataStore.lockers
+  console.log('🔍 AdminMain.vue: lockers computed 실행', {
+    length: data.length,
+    data: data.slice(0, 2),
+  })
+  return data
+})
 
 // 통계 계산
 const stats = computed(() => {
   const total = lockers.value.length
-  const available = lockers.value.filter((l) => l.status === 'available').length
-  const inUse = lockers.value.filter((l) => l.status === 'in-use').length
+  const inUse = lockers.value.filter((l) => l.status === 'active').length
+  const inCancle = lockers.value.filter((l) => l.status === 'active').length
+  const maintenance = lockers.value.filter((l) => l.status === 'maintenance').length
+  const broken = lockers.value.filter((l) => l.status === 'broken').length
+  const available = total - inUse - maintenance - broken
   const activeReservations = reservations.value.filter((r) => r.status === 'active').length
   const usageRate = total > 0 ? Math.round((inUse / total) * 100) : 0
+
+  console.log('📊 AdminMain.vue: stats 계산', {
+    total,
+    available,
+    inUse,
+    maintenance,
+    broken,
+    usageRate,
+    activeReservations,
+  })
 
   return {
     available,
@@ -207,18 +589,32 @@ const stats = computed(() => {
   }
 })
 
-// 최근 예약 목록
+// 고객 맵 (메모이제이션: 빠른 조회를 위한 캐시)
+const customerMap = computed(() => {
+  const map = new Map()
+  customers.value.forEach((c) => map.set(c.id, c))
+  return map
+})
+
+// 최근 예약 목록 (메모이제이션)
 const recentReservations = computed(() => {
   return [...reservations.value]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5)
+    .map((res) => {
+      const customer = customerMap.value.get(res.customerId)
+      return {
+        ...res,
+        customerName: customer?.name || '고객정보없음',
+      }
+    })
+    .slice(0, 6)
 })
 
-// 현재 사용중인 고객 정보
+// 현재 사용중인 고객 정보 (메모이제이션)
 const activeCustomers = computed(() => {
   const activeRes = reservations.value.filter((r) => r.status === 'active')
   return activeRes.map((res) => {
-    const customer = customers.value.find((c) => c.id === res.customerId)
+    const customer = customerMap.value.get(res.customerId)
     return {
       ...customer,
       lockerNumber: res.lockerNumber,
@@ -226,33 +622,18 @@ const activeCustomers = computed(() => {
   })
 })
 
-// 보관함 상태 차트 데이터
+// 보관함 상태 차트 데이터 (stats 데이터 재사용)
 const chartData = computed(() => {
-  const statusCounts = {
-    available: 0,
-    'in-use': 0,
-    maintenance: 0,
-    broken: 0,
-  }
-
-  lockers.value.forEach((locker) => {
-    if (statusCounts[locker.status] !== undefined) {
-      statusCounts[locker.status]++
-    }
-  })
+  const maintenance = lockers.value.filter((l) => l.status === 'maintenance').length
+  const broken = lockers.value.filter((l) => l.status === 'broken').length
 
   return {
     labels: ['미사용', '사용중', '정비중', '고장'],
     datasets: [
       {
         label: '보관함 수',
-        data: [
-          statusCounts.available,
-          statusCounts['in-use'],
-          statusCounts.maintenance,
-          statusCounts.broken,
-        ],
-        backgroundColor: ['#007aff', '#000000', '#ff9500', '#ff3b30'],
+        data: [stats.value.available, stats.value.inUse, maintenance, broken],
+        backgroundColor: ['#007aff', '#34c759', '#ff9500', '#ff3b30'],
         borderRadius: 8,
       },
     ],
@@ -278,47 +659,39 @@ const chartOptions = {
   },
 }
 
-// 회원 등급별 차트 데이터
-const membershipChartData = computed(() => {
-  const membershipCounts = {
-    platinum: 0,
-    gold: 0,
-    silver: 0,
-    bronze: 0,
-  }
-
-  customers.value.forEach((customer) => {
-    if (membershipCounts[customer.membershipLevel] !== undefined) {
-      membershipCounts[customer.membershipLevel]++
-    }
-  })
-
-  return {
-    labels: ['플래티넘', '골드', '실버', '브론즈'],
-    datasets: [
-      {
-        data: [
-          membershipCounts.platinum,
-          membershipCounts.gold,
-          membershipCounts.silver,
-          membershipCounts.bronze,
-        ],
-        backgroundColor: ['#000000', '#ffd700', '#c0c0c0', '#cd7f32'],
-      },
-    ],
-  }
+// 고객 참여도 지표
+const dailyActiveUsers = computed(() => {
+  // 활성 예약 건수를 일일 활성 사용자 수로 계산
+  const activeCount = reservations.value.filter((r) => r.status === 'active').length
+  return Math.max(activeCount, 0)
 })
 
-// 도넛 차트 옵션
-const doughnutChartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'bottom',
-    },
-  },
-}
+// 재방문율 (메모이제이션: 스토어의 고객별 예약 수 사용)
+const repeatVisitRate = computed(() => {
+  if (customers.value.length === 0) return 0
+  const repeatCustomers = Array.from(dataStore.customerReservationCount.values()).filter(
+    (count) => count >= 2,
+  ).length
+  const rate = customers.value.length > 0 ? (repeatCustomers / customers.value.length) * 100 : 0
+  return Math.round(rate)
+})
+
+const newCustomerCount = computed(() => {
+  // 최근 30일 내 가입한 고객 수
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+  return customers.value.filter((customer) => {
+    const createdDate = new Date(customer.createdAt || 0)
+    return createdDate >= thirtyDaysAgo
+  }).length
+})
+
+const newCustomerPercentage = computed(() => {
+  if (customers.value.length === 0) return 0
+  const rate = (newCustomerCount.value / customers.value.length) * 100
+  return Math.round(rate)
+})
 
 // 유틸리티 함수
 const getReservationStatus = (status) => {
@@ -339,16 +712,6 @@ const formatDateTime = (dateTimeStr) => {
     hour: '2-digit',
     minute: '2-digit',
   })
-}
-
-const getMembershipLabel = (level) => {
-  const labels = {
-    platinum: '플래티넘',
-    gold: '골드',
-    silver: '실버',
-    bronze: '브론즈',
-  }
-  return labels[level] || level
 }
 
 const getMembershipClass = (level) => {
@@ -361,309 +724,123 @@ const getMembershipClass = (level) => {
   return classes[level] || 'bg-gray-200 text-black'
 }
 
-// 데이터 로드
-const loadData = () => {
-  loading.value = true
-  try {
-    lockers.value = lockersData.lockers
-    reservations.value = reservationsData.reservations
-    customers.value = customersData.customers
-  } finally {
-    loading.value = false
+// 공지사항 관련 함수
+const openNoticeDetail = (notice) => {
+  selectedNotice.value = notice
+  showNoticeModal.value = true
+}
+
+const closeNoticeModal = () => {
+  if (selectedNotice.value && !selectedNotice.value.isRead) {
+    selectedNotice.value.isRead = true
+  }
+  showNoticeModal.value = false
+  selectedNotice.value = null
+}
+
+const openAddNoticeModal = () => {
+  newNotice.value = {
+    title: '',
+    content: '',
+    author: '관리자',
+  }
+  showAddNoticeModal.value = true
+}
+
+const closeAddNoticeModal = () => {
+  showAddNoticeModal.value = false
+}
+
+const addNotice = () => {
+  if (!newNotice.value.title.trim() || !newNotice.value.content.trim()) {
+    alert('제목과 내용을 입력해주세요.')
+    return
+  }
+
+  const now = new Date()
+  const newNoticeItem = {
+    id: notices.value.length + 1,
+    title: newNotice.value.title,
+    content: newNotice.value.content,
+    author: newNotice.value.author,
+    createdAt: now.toISOString().slice(0, 19).replace('T', ' '),
+    isRead: false,
+  }
+
+  notices.value.unshift(newNoticeItem)
+  closeAddNoticeModal()
+}
+
+// 새 글 여부 확인 (최근 24시간 이내)
+const isNewNotice = (createdAt) => {
+  const now = new Date()
+  const noticeDate = new Date(createdAt)
+  const hoursDiff = (now - noticeDate) / (1000 * 60 * 60)
+  return hoursDiff <= 24
+}
+
+// 공지사항 수정 모달 열기
+const openEditNoticeModal = (notice) => {
+  editNotice.value = {
+    id: notice.id,
+    title: notice.title,
+    content: notice.content,
+    author: notice.author,
+  }
+  showNoticeModal.value = false
+  showEditNoticeModal.value = true
+}
+
+// 공지사항 수정 모달 닫기
+const closeEditNoticeModal = () => {
+  showEditNoticeModal.value = false
+  editNotice.value = {
+    id: null,
+    title: '',
+    content: '',
+    author: '',
   }
 }
 
-// 초기 데이터 로드
-onMounted(() => {
-  loadData()
-})
-</script>
-      <h2 class="text-lg font-semibold mb-6" style="color: #1E293B">당일 보관함 현황</h2>
-      <div v-if="statsLoading" class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm">통계 로딩 중...</div>
-      <div v-else-if="statsError" class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm text-red-500">{{ statsError }}</div>
-      <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <!-- Blue Card -->
-        <div class="text-white p-6 rounded-3xl shadow-sm" style="background: linear-gradient(135deg, #007AFF 0%, #007AFF 100%)">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <div class="text-sm font-medium opacity-90">미사용</div>
-              <div class="text-3xl font-bold mt-2">{{ dashboardStats.totalLockers || 14 }}</div>
-            </div>
-            <i class="fi fi-rr-arrow-up-right text-xl"></i>
-          </div>
-        </div>
-
-        <!-- Dark Card -->
-        <div class="text-white p-6 rounded-3xl shadow-sm" style="background: linear-gradient(135deg, #000000 0%, #000000 100%)">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <div class="text-sm font-medium opacity-90">예약 대기</div>
-              <div class="text-3xl font-bold mt-2">{{ dashboardStats.inUseLockers || 14 }}</div>
-            </div>
-            <i class="fi fi-rr-arrow-down-left text-xl"></i>
-          </div>
-        </div>
-
-        <!-- Blue Card -->
-        <div class="text-white p-6 rounded-3xl shadow-sm" style="background: linear-gradient(135deg, #007AFF 0%, #007AFF 100%)">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <div class="text-sm font-medium opacity-90">사용중 대여액</div>
-              <div class="text-3xl font-bold mt-2">{{ dashboardStats.availableLockers || 80 }}%</div>
-            </div>
-            <i class="fi fi-rr-arrow-up-right text-xl"></i>
-          </div>
-        </div>
-
-        <!-- Dark Card -->
-        <div class="text-white p-6 rounded-3xl shadow-sm" style="background: linear-gradient(135deg, #000000 0%, #000000 100%)">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <div class="text-sm font-medium opacity-90">예약 대기</div>
-              <div class="text-3xl font-bold mt-2">{{ dashboardStats.usageRate || 14 }}</div>
-            </div>
-            <i class="fi fi-rr-arrow-down-left text-xl"></i>
-          </div>
-        </div>
-
-        <!-- Blue Card -->
-        <div class="text-white p-6 rounded-3xl shadow-sm hidden lg:block" style="background: linear-gradient(135deg, #007AFF 0%, #007AFF 100%)">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <div class="text-sm font-medium opacity-90">예약 대기</div>
-              <div class="text-3xl font-bold mt-2">{{ dashboardStats.todayReservations || 0 }}%</div>
-            </div>
-            <i class="fi fi-rr-arrow-up-right text-xl"></i>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 두 컬럼 레이아웃 -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-      <!-- 좌측: 최근 예약 + 차트 -->
-      <div>
-        <!-- 최근 예약 테이블 -->
-        <section class="mb-8">
-          <h2 class="text-lg font-semibold mb-4" style="color: #1E293B">당일 입반</h2>
-          <div v-if="reservationsLoading" class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm text-slate-600 dark:text-slate-400">예약 로딩 중...</div>
-          <div v-else-if="reservationsError" class="p-6 text-center bg-white dark:bg-slate-800 rounded-2xl shadow-sm text-red-500">{{ reservationsError }}</div>
-          <table v-else class="w-full bg-white dark:bg-slate-800 rounded-2xl shadow-sm overflow-hidden text-sm">
-            <thead class="bg-slate-100 dark:bg-slate-700">
-              <tr>
-                <th class="px-4 py-3 text-left font-semibold" style="color: #1E293B">접수시간</th>
-                <th class="px-4 py-3 text-left font-semibold" style="color: #1E293B">성함</th>
-                <th class="px-4 py-3 text-left font-semibold" style="color: #1E293B">입반</th>
-                <th class="px-4 py-3 text-left font-semibold" style="color: #1E293B">상태</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="reservation in recentReservations.slice(0, 5)" :key="reservation.id" class="border-t border-slate-200 dark:border-slate-700">
-                <td class="px-4 py-3 text-slate-900 dark:text-slate-100">{{ formatDateTime(reservation.startTime).split(' ')[0] }}</td>
-                <td class="px-4 py-3 text-slate-900 dark:text-slate-100">{{ reservation.customerName }}</td>
-                <td class="px-4 py-3 text-slate-900 dark:text-slate-100">{{ reservation.lockerNumber }}</td>
-                <td class="px-4 py-3">
-                  <StatusChip :status="getReservationStatus(reservation.status)" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
-
-        <!-- 차트 영역 -->
-        <section class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6">
-          <h2 class="text-lg font-semibold mb-4" style="color: #1E293B">주간 통계</h2>
-          <div class="h-48 flex items-center justify-center text-slate-500 dark:text-slate-400">
-            차트 영역 (Chart Library 필요)
-          </div>
-        </section>
-      </div>
-
-      <!-- 우측: 사물함 현황 + 다른 영역 -->
-      <div>
-        <!-- 테이블 섹션 -->
-        <section class="mb-8">
-          <h2 class="text-lg font-semibold mb-4" style="color: #1E293B">금주 입반</h2>
-          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm overflow-hidden">
-            <table class="w-full text-sm">
-              <thead class="bg-slate-100 dark:bg-slate-700">
-                <tr>
-                  <th class="px-4 py-3 text-left font-semibold" style="color: #1E293B">입반 일자</th>
-                  <th class="px-4 py-3 text-left font-semibold" style="color: #1E293B">성함</th>
-                  <th class="px-4 py-3 text-left font-semibold" style="color: #1E293B">입반번호</th>
-                  <th class="px-4 py-3 text-left font-semibold" style="color: #1E293B">금액</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="border-t border-slate-200 dark:border-slate-700">
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">2025-11-16</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">이연준</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">집장 KESPO번</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">1500 건</td>
-                </tr>
-                <tr class="border-t border-slate-200 dark:border-slate-700">
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">2025-11-16</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">방용 준</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">집장 KESPO번</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">5000 건</td>
-                </tr>
-                <tr class="border-t border-slate-200 dark:border-slate-700">
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">2025-11-16</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">나종우 유</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">-</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">700</td>
-                </tr>
-                <tr class="border-t border-slate-200 dark:border-slate-700">
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">2025-11-16</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">APEC 영실 위령</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">집장 KESPO번</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">5000 건</td>
-                </tr>
-                <tr class="border-t border-slate-200 dark:border-slate-700">
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">2025-11-16</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">OOZ 족재</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">집장 KESPO번</td>
-                  <td class="px-4 py-3 text-slate-900 dark:text-slate-100">5000 건</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- 우측 카드 영역 -->
-        <div class="grid grid-cols-2 gap-4">
-          <div class="bg-blue-500 text-white p-6 rounded-2xl shadow-md">
-            <div class="text-sm font-medium opacity-90 mb-3">예약 확인</div>
-            <div class="text-4xl font-bold">↻</div>
-          </div>
-          <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
-            <div class="text-sm font-semibold mb-3" style="color: #1E293B">통계</div>
-            <div class="flex gap-2">
-              <div class="w-8 h-16 bg-blue-500 rounded"></div>
-              <div class="w-8 h-12 bg-gray-300 rounded"></div>
-              <div class="w-8 h-10 bg-gray-300 rounded"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</template>
-
-<script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { lockerService } from '@/api/lockerService'
-import { reservationService } from '@/api/reservationService'
-import { statsService } from '@/api/statsService'
-import StatusChip from '@/components/common/StatusChip.vue'
-
-// 상태 관리
-const dashboardStats = ref({})
-const lockers = ref([])
-const recentReservations = ref([])
-const lockerFilter = ref('')
-
-// 로딩 상태
-const statsLoading = ref(false)
-const lockersLoading = ref(false)
-const reservationsLoading = ref(false)
-
-// 에러 상태
-const statsError = ref(null)
-const lockersError = ref(null)
-const reservationsError = ref(null)
-
-// 통계 조회
-const fetchDashboardStats = async () => {
-  statsLoading.value = true
-  statsError.value = null
-
-  try {
-    const response = await statsService.getDashboard()
-    dashboardStats.value = response.data
-  } catch (err) {
-    statsError.value = '통계를 불러오는데 실패했습니다.'
-    console.error(err)
-  } finally {
-    statsLoading.value = false
+// 공지사항 수정 저장
+const updateNotice = () => {
+  if (!editNotice.value.title.trim() || !editNotice.value.content.trim()) {
+    alert('제목과 내용을 입력해주세요.')
+    return
   }
-}
 
-// 사물함 조회
-const fetchLockers = async () => {
-  lockersLoading.value = true
-  lockersError.value = null
-
-  try {
-    const params = {}
-    if (lockerFilter.value) {
-      params.status = lockerFilter.value
+  const index = notices.value.findIndex((n) => n.id === editNotice.value.id)
+  if (index !== -1) {
+    notices.value[index] = {
+      ...notices.value[index],
+      title: editNotice.value.title,
+      content: editNotice.value.content,
+      author: editNotice.value.author,
     }
+  }
 
-    const response = await lockerService.getAll(params)
-    lockers.value = response.data
-  } catch (err) {
-    lockersError.value = '사물함 목록을 불러오는데 실패했습니다.'
-    console.error(err)
-  } finally {
-    lockersLoading.value = false
+  closeEditNoticeModal()
+}
+
+// 공지사항 삭제
+const deleteNotice = (noticeId) => {
+  if (confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
+    const index = notices.value.findIndex((n) => n.id === noticeId)
+    if (index !== -1) {
+      notices.value.splice(index, 1)
+    }
+    showNoticeModal.value = false
   }
 }
 
-// 예약 조회
-const fetchReservations = async () => {
-  reservationsLoading.value = true
-  reservationsError.value = null
-
-  try {
-    const response = await reservationService.getAll()
-    // 최근 10개만 표시
-    recentReservations.value = response.data.slice(0, 10)
-  } catch (err) {
-    reservationsError.value = '예약 목록을 불러오는데 실패했습니다.'
-    console.error(err)
-  } finally {
-    reservationsLoading.value = false
-  }
+// 본인이 작성한 공지사항인지 확인
+const isOwnNotice = (notice) => {
+  return notice.author === currentUser.value
 }
 
-// 유틸리티 함수
-const getSizeLabel = (size) => {
-  const sizeMap = {
-    small: '소형',
-    medium: '중형',
-    large: '대형',
-  }
-  return sizeMap[size] || size
-}
-
-const getReservationStatus = (status) => {
-  const statusMap = {
-    active: 'in-use',
-    completed: 'available',
-    cancelled: 'broken',
-    expired: 'maintenance',
-  }
-  return statusMap[status] || status
-}
-
-const formatDateTime = (dateTimeStr) => {
-  const date = new Date(dateTimeStr)
-  return date.toLocaleString('ko-KR', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
-// 초기 데이터 로드
+// 스토어에서 데이터를 가져오므로 별도의 로드가 필요 없음
+// App.vue에서 초기화할 때 이미 로드됨
 onMounted(() => {
-  fetchDashboardStats()
-  fetchLockers()
-  fetchReservations()
+  // 필요시 추가 초기화 작업
 })
 </script>
->>>>>>> a080d41cc329b14adb800ca3e46fd8c151a500d6

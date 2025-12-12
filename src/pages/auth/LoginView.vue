@@ -16,14 +16,14 @@
           <div
             class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4"
           >
-            <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">GigStash</h1>
+          </div>
+          <p class="text-gray-600 dark:text-gray-400">로그인</p>
+          <!-- <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24">
               <path
                 d="M3 3h7v7H3V3zm2 2v3h3V5H5zm7-2h7v7h-7V3zm2 2v3h3V5h-3zM3 13h7v7H3v-7zm2 2v3h3v-3H5zm7-2h7v7h-7v-7zm2 2v3h3v-3h-3z"
               />
-            </svg>
-          </div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">GigStash</h1>
-          <p class="text-gray-600 dark:text-gray-400">로그인</p>
+            </svg> -->
         </div>
 
         <!-- Form -->
@@ -148,7 +148,7 @@
 
       <!-- Footer -->
       <p class="text-center text-white/80 text-sm mt-8">
-        &copy; 2024 GigStash. All rights reserved.
+        &copy; 2025 GigStash. All rights reserved.
       </p>
     </div>
   </div>
@@ -246,10 +246,4 @@ const handleLogin = async () => {
 }
 </script>
 
-<style scoped>
-@import '@/styles/variables.scss';
-
-:root {
-  --primary: #{$color-primary};
-}
-</style>
+<style scoped></style>
